@@ -1,0 +1,37 @@
+from flask import Flask, jsonify, request
+import requests
+
+app = Flask(__name__)
+
+# Bypass link endpoint
+@app.route('/bypass', methods=['GET'])
+def bypass_link():
+    url = request.args.get('url')
+    
+    if not url:
+        return jsonify({'error': 'URL parameter is required'}), 400
+    
+    # Make a GET request to the bypass API
+    try:
+        response = requests.get(f"http://37.114.41.51:6072/api/bypass?link={url}")
+        response.raise_for_status()  # Raise an error for bad responses
+        data = response.json()  # Parse JSON response
+        return jsonify(data)  # Return the response as JSON
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+
+# Support endpoint
+@app.route('/supported', methods=['GET'])
+def get_supported():
+    try:
+        # Make a GET request to the supported API
+        response = requests.get("http://37.114.41.51:6072/api/supported")
+        response.raise_for_status()
+        data = response.json()  # Parse JSON response
+        return jsonify(data)  # Return the response as JSON
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+
+# Run the app
+if __name__ == '__main__':
+    app.run(debug=True)
